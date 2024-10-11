@@ -4,15 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d6e23665-6673-487d-b7a3-80782e1e17dd" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/pythonProject.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Lab1_1.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Lab1_2.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Lab1_3.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Lab1_4.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Lab1_5.py" afterDir="false" />
+    <list default="true" id="d6e23665-6673-487d-b7a3-80782e1e17dd" name="Changes" comment="Lab1_finish">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,9 +22,21 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 4
-}]]></component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;moosbeere&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/moosbeere/NN.git&quot;,
+    &quot;accountId&quot;: &quot;0541d80d-e04d-497e-887e-932261b338a3&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 4
+}</component>
   <component name="ProjectId" id="2mxseFMzr4HrkCUe6CDq4IZZZHu" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <ConfirmationsSetting value="2" id="Add" />
@@ -49,7 +54,7 @@
     "Python.Lab1_5.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "master",
-    "last_opened_file_path": "D:/Work/Polytech/Programming/221-171/NN/pythonProject",
+    "last_opened_file_path": "D:/Work/Polytech/Programming/221-171/neuralNetworks",
     "settings.editor.selected.configurable": "preferences.lookFeel"
   }
 }]]></component>
@@ -74,6 +79,19 @@
       <option name="presentableId" value="Default" />
       <updated>1728029654697</updated>
     </task>
+    <task id="LOCAL-00001" summary="Lab1_finish">
+      <option name="closed" value="true" />
+      <created>1728033823410</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1728033823410</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Lab1_finish" />
+    <option name="LAST_COMMIT_MESSAGE" value="Lab1_finish" />
   </component>
 </project>
