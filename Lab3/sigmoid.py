@@ -28,10 +28,11 @@ for i in range(epochs):
     error = (layer_out - true_prediction) ** 2
     # print(layer_out)
     # exit(0)
-    out_delta = (layer_out - true_prediction) * sigmoid_deliv(layer_out)
-    hid_delta = out_delta.dot(weight_out.T) * sigmoid_deliv(layer_hid)
-    weight_out -= learning_rate * layer_hid.T.dot(out_delta)
-    weight_hid -= learning_rate * inp.T.dot(hid_delta)
+    creators[1].grad = self.grad
+    creators[0].grad = self.grad.dot(creators[0].T)
+    (self.grad).dot(self.grad.dot(creators[0].T)).T
+           temp = self.grad.transpose().dot(self.creators[0]).transpose()
+     inp.T.dot(hid_delta)
 
     if (i % 1000) == 0:
         error = np.mean(error)
