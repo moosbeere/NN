@@ -2,6 +2,8 @@ import numpy as np
 from keras.src.models.functional import operation_fn
 from tensorflow.compiler.tf2xla.python.xla import transpose
 
+from pythonProject.Lab3.ReLU import num_epoch
+
 
 class Tensor(object):
     grad = None
@@ -143,18 +145,41 @@ class Tensor(object):
                 return False
         return True
 
+    def __repr__(self):
+        return str(self.data.__repr__())
+
+class SGD(object):
+    def __init__(self, weigts, learning_rate):
+        self.weights = weigts
+        self.learning_rate = learning_rate
+
+    def step(self):
+        for weight in self.weights:
+            weight.data -=self.learning_rate * weight.grad.data
+            weight.grad.data *= 0
+
+np.random.seed(0)
+inp = Tensor([[2,5],[10,5]], autograd=True)
+true_predictions = Tensor([[7],[15]], autograd=True)
+
+weights = [
+    Tensor(np.random.rand(2,2), autograd=True),
+    Tensor(np.random.rand(2,1), autograd=True)
+]
+sgd = SGD(weights, 0.001)
+num_epoch = 30
+for i in range(num_epoch):
+    prediction = inp.dot(weights[0]).dot(weights[1])
+    error = (prediction - true_predictions) * (prediction - true_predictions)
+    error.backward(Tensor(np.ones_like(error.data)))
+    sgd.step()
+    print("Error: ", error)
+
+print(weights)
+
+print(Tensor([6,7]).dot(weights[0]).dot(weights[1]))
 
 
-a_1 = Tensor([[1,2,3],[4,5,6]], autograd=True)
-a_2 = a_1.sigmoid()
-a_2.backward(Tensor([4,5,10]))
-print(a_2)
-print(a_1.grad)
-
-a_3 = Tensor([[2,3,4],[2,3,5]], autograd=True)
-a_4 = a_3.tanh()
-a_4.backward(Tensor([4,5,10]))
-print(a_3.grad)
 
 
 
