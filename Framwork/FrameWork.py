@@ -2,9 +2,6 @@ import numpy as np
 from keras.src.models.functional import operation_fn
 from tensorflow.compiler.tf2xla.python.xla import transpose
 
-from pythonProject.Lab3.ReLU import num_epoch
-
-
 class Tensor(object):
     grad = None
     # children = {}
@@ -17,7 +14,7 @@ class Tensor(object):
         self.children = {}
 
         if id is None:
-            self.id = np.random.randint(0, 100000000)
+            self.id = np.random.randint(0, 1000000000)
 
         if (self.creators is not None):
             for creator in creators:
@@ -80,6 +77,8 @@ class Tensor(object):
                 elif "tanh" in self.operation_on_creation:
                     temp = Tensor(np.ones_like(self.grad.data))
                     self.creators[0].backward(self.grad*(temp - (self * self)), self)
+                elif "softmax" in self.operation_on_creation:
+                    self.creators[0].backward(Tensor(self.grad.data), self)
 
     def __neg__(self):
         if self.autograd:
@@ -100,9 +99,9 @@ class Tensor(object):
             return Tensor(self.data * other.data)
 
     def sum(self, axis):
-        if(self.autograd):
+        if self.autograd:
             return Tensor(self.data.sum(axis), [self], "sum_"+str(axis),True)
-        return(self.data.sum())
+        return Tensor(self.data.sum(axis))
 
     def expand(self, axis, count_copies):
         transpose = list(range(0, len(self.data.shape)))
@@ -139,6 +138,13 @@ class Tensor(object):
         else:
             return Tensor(np.tanh(self.data))
 
+    def softmax(self):
+        exp = np.exp(self.data)
+        exp = exp/np.sum(exp, axis = 1, keepdims=True)
+        if self.autograd:
+            return Tensor(exp, [self], "softmax", True)
+        return Tensor(exp)
+
     def check_grads_from_child(self):
         for id in self.children:
             if self.children[id] != 0:
@@ -158,26 +164,122 @@ class SGD(object):
             weight.data -=self.learning_rate * weight.grad.data
             weight.grad.data *= 0
 
-np.random.seed(0)
-inp = Tensor([[2,5],[10,5]], autograd=True)
-true_predictions = Tensor([[7],[15]], autograd=True)
+class Layer(object):
+    def __init__(self):
+        self.parameters = []
 
-weights = [
-    Tensor(np.random.rand(2,2), autograd=True),
-    Tensor(np.random.rand(2,1), autograd=True)
-]
-sgd = SGD(weights, 0.001)
-num_epoch = 30
+    def get_parameters(self):
+        return self.parameters
+
+class Linear(Layer):
+    def __init__(self, input_count, output_count):
+        super().__init__()
+        weight = np.random.randn(input_count, output_count) * np.sqrt(2.0/input_count)
+        self.weight = Tensor(weight,autograd=True)
+        self.bias = Tensor(np.zeros(output_count), autograd=True)
+        self.parameters.append(self.weight)
+        self.parameters.append(self.bias)
+
+    def forward(self, inp):
+        return inp.dot(self.weight) + self.bias.expand(0,len(inp.data))
+
+class Sequential(Layer):
+    def __init__(self, layers):
+        super().__init__()
+        self.layers = layers
+
+    def add(self, layer):
+        self.layers.append(layer)
+
+    def forward(self, inp):
+        for layer in self.layers:
+            inp = layer.forward(inp)
+        return inp
+
+    def get_parameters(self):
+        params = []
+        for layer in self.layers:
+            params += layer.get_parameters()
+        return params
+
+class Sigmoid(Layer):
+    def forward(self, inp):
+        return inp.sigmoid()
+
+class Tanh(Layer):
+    def forward(self, inp):
+        return inp.tanh()
+
+class Softmax(Layer):
+    def forward(self, inp):
+        return inp.softmax()
+
+class MSELoss(Layer):
+    def forward(self, prediction, true_prediction):
+        return ((prediction-true_prediction)*(prediction-true_prediction)).sum(0)
+
+np.random.seed(0)
+
+x = Tensor([
+    [0,0,0,0], # 0
+    [0,0,0,1], # 1
+    [0,0,1,0], # 2
+    [0,0,1,1], # 3
+    [0,1,0,0], # 4
+    [0,1,0,1], # 5
+    [0,1,1,0], # 6
+    [0,1,1,1], # 7
+    [1,0,0,0], # 8
+    [1,0,0,1]  # 9
+], autograd=True)
+
+y = Tensor([
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    ], autograd=True)
+
+
+model = Sequential([Linear(4,15), Sigmoid(), Linear(15,10), Softmax()])
+sgd = SGD(model.get_parameters(), 0.01)
+num_epoch = 10000
+
+loss = MSELoss()
 for i in range(num_epoch):
-    prediction = inp.dot(weights[0]).dot(weights[1])
-    error = (prediction - true_predictions) * (prediction - true_predictions)
+    predictions = model.forward(x)
+    error = loss.forward(predictions, y)
     error.backward(Tensor(np.ones_like(error.data)))
     sgd.step()
-    print("Error: ", error)
+    if num_epoch % 1000 == 0:
+        print(f"Epoch: {num_epoch}, Error: {error}")
 
-print(weights)
+def predict(inp):
+    output_layer = model.forward(inp)
+    return np.argmax(output_layer.data)
+x = ([
+    [0,0,0,0], # 0
+    [0,0,0,1], # 1
+    [0,0,1,0], # 2
+    [0,0,1,1], # 3
+    [0,1,0,0], # 4
+    [0,1,0,1], # 5
+    [0,1,1,0], # 6
+    [0,1,1,1], # 7
+    [1,0,0,0], # 8
+    [1,0,0,1]  # 9
+])
 
-print(Tensor([6,7]).dot(weights[0]).dot(weights[1]))
+for inp in x:
+    print("------------------------------------")
+    print(f"Предсказанная цифра для {inp}:", predict(Tensor([inp])))
+
 
 
 
